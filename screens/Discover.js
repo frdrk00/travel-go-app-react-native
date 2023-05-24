@@ -16,13 +16,19 @@ import MenuContainer from "../components/MenuContainer";
 import { FontAwesome } from "@expo/vector-icons";
 import ItemCarContainer from "../components/ItemCardContainer";
 import { getPlacesData } from "../api";
+import { GOOGLE_PLACES_KEY } from "@env";
 
 const Discover = () => {
+  const googleKey = GOOGLE_PLACES_KEY;
   const navigation = useNavigation();
 
   const [type, setType] = useState("restaurants");
   const [isLoading, setIsLoading] = useState(false);
   const [mainData, setMainData] = useState([]);
+  const [bl_lat, setBL_lat] = useState(null);
+  const [bl_lng, setBL_lng] = useState(null);
+  const [tr_lat, setTr_lat] = useState(null);
+  const [tr_lng, setTr_lng] = useState(null);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -32,15 +38,13 @@ const Discover = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    getPlacesData().then((data) => {
+    getPlacesData(bl_lat, bl_lng, tr_lat, tr_lng, type).then((data) => {
       setMainData(data);
       setInterval(() => {
         setIsLoading(false);
       }, 2000);
     });
-
-    return () => {};
-  }, []);
+  }, [bl_lat, bl_lng, tr_lat, tr_lng, type]);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 relative">
@@ -65,10 +69,14 @@ const Discover = () => {
           fetchDetails={true}
           onPress={(data, details = null) => {
             // 'details' is provided when fetchDetails = true
-            console.log(details?.geometry?.viewport);
+            // console.log(details?.geometry?.viewport);
+            setBL_lat(details?.geometry?.viewport?.southwest?.lat);
+            setBL_lng(details?.geometry?.viewport?.southwest?.lng);
+            setTr_lat(details?.geometry?.viewport?.northeast?.lat);
+            setTr_lng(details?.geometry?.viewport?.northeast?.lng);
           }}
           query={{
-            key: "AIzaSyDBsUTQ2ssGPuRBjasp8oJqGnnL8_ERbaE",
+            key: googleKey,
             language: "en",
           }}
         />
@@ -83,7 +91,7 @@ const Discover = () => {
         <ScrollView>
           <View className="flex-row items-center justify-between px-8 mt-8">
             <MenuContainer
-              key={"hotel"}
+              key={"hotels"}
               title="Hotels"
               imageSrc={Hotels}
               type={type}
@@ -124,7 +132,7 @@ const Discover = () => {
             </View>
 
             <View className="px-4 mt-8 flex-row items-center justify-evenly flex-wrap">
-              {mainData?.length > 0 ? (
+              {mainData?.length > 0 && mainData.data?.name !== 0 ? (
                 <>
                   {mainData?.map((data, i) => (
                     <ItemCarContainer
