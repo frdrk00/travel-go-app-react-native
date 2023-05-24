@@ -1,5 +1,6 @@
 import { View, Text, Image } from "react-native";
 import React, { useLayoutEffect } from "react";
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Avatar } from "../assets";
@@ -27,6 +28,22 @@ const Discover = () => {
             className="w-full h-full rounded-md object-cover"
           />
         </View>
+      </View>
+
+      <View className="flex-row items-center bg-white mx-4 rounded-xl py-1 px-4 shadow-lg mt-4">
+        <GooglePlacesAutocomplete
+          GooglePlacesDetailsQuery={{ fields: "geometry" }}
+          placeholder="Search"
+          fetchDetails={true}
+          onPress={(data, details = null) => {
+            // 'details' is provided when fetchDetails = true
+            console.log(details?.geometry?.viewport);
+          }}
+          query={{
+            key: "AIzaSyDBsUTQ2ssGPuRBjasp8oJqGnnL8_ERbaE",
+            language: "en",
+          }}
+        />
       </View>
     </SafeAreaView>
   );
