@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import React, { useLayoutEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -15,6 +15,7 @@ import { Attractions, Avatar, Hotels, NotFound, Restaurants } from "../assets";
 import MenuContainer from "../components/MenuContainer";
 import { FontAwesome } from "@expo/vector-icons";
 import ItemCarContainer from "../components/ItemCardContainer";
+import { getPlacesData } from "../api";
 
 const Discover = () => {
   const navigation = useNavigation();
@@ -27,6 +28,18 @@ const Discover = () => {
     navigation.setOptions({
       headerShown: false,
     });
+  }, []);
+
+  useEffect(() => {
+    setIsLoading(true);
+    getPlacesData().then((data) => {
+      setMainData(data);
+      setInterval(() => {
+        setIsLoading(false);
+      }, 2000);
+    });
+
+    return () => {};
   }, []);
 
   return (
@@ -113,22 +126,19 @@ const Discover = () => {
             <View className="px-4 mt-8 flex-row items-center justify-evenly flex-wrap">
               {mainData?.length > 0 ? (
                 <>
-                  <ItemCarContainer
-                    key={"101"}
-                    imageSrc={
-                      "https://cdn.pixabay.com/photo/2023/03/05/23/46/girl-7832385_960_720.jpg"
-                    }
-                    title="Something"
-                    location="Nitra"
-                  />
-                  <ItemCarContainer
-                    key={"102"}
-                    imageSrc={
-                      "https://cdn.pixabay.com/photo/2016/03/23/04/01/woman-1274056_960_720.jpg"
-                    }
-                    title="Sample"
-                    location="Bratislava"
-                  />
+                  {mainData?.map((data, i) => (
+                    <ItemCarContainer
+                      key={i}
+                      imageSrc={
+                        data?.photo?.images?.medium?.url
+                          ? data?.photo?.images?.medium?.url
+                          : "https://cdn.pixabay.com/photo/2015/10/30/12/22/eat-1014025_1280.jpg"
+                      }
+                      title={data.name}
+                      location={data?.address}
+                      data={data}
+                    />
+                  ))}
                 </>
               ) : (
                 <>
